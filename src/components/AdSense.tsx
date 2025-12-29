@@ -1,15 +1,14 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 declare global {
   interface Window {
-    adsbygoogle: any[];
+    adsbygoogle: Record<string, unknown>[];
   }
 }
 
 export function AdSense() {
   useEffect(() => {
     try {
-      // @ts-ignore
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (e) {
       console.error("AdSense error", e);
