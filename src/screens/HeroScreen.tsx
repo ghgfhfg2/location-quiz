@@ -44,7 +44,7 @@ export function HeroScreen({ onStart }: { onStart: () => void }) {
       <div className="relative mx-auto flex min-h-dvh w-full max-w-6xl flex-col items-center justify-center px-6 py-16">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card/70 px-3 py-1 text-sm text-muted-foreground backdrop-blur">
           <Globe2Icon className="size-4" />
-          지도 기반 지역명(나라/도시) 맞추기
+          지도 기반 나라 맞추기
         </div>
 
         <div className="w-full rounded-3xl border bg-card/70 p-8 shadow-sm backdrop-blur md:p-12">
