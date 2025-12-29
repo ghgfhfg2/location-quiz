@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FlagIcon, MapIcon, BookOpenIcon } from "lucide-react";
+import { AdSense } from "@/components/AdSense";
 
 export type GameMode = "country" | "find-on-map" | "learning";
 
@@ -113,6 +114,7 @@ export function ModeSelectScreen({
             </CardFooter>
           </Card>
         </div>
+        <AdSense />
       </div>
     </div>
   );

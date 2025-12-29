@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Globe2Icon, PlayIcon } from "lucide-react";
 import * as React from "react";
+import { AdSense } from "@/components/AdSense";
 
 export function HeroScreen({ onStart }: { onStart: () => void }) {
   const ref = React.useRef<HTMLDivElement | null>(null);
@@ -68,6 +69,8 @@ export function HeroScreen({ onStart }: { onStart: () => void }) {
             </div>
           </div>
         </div>
+
+        <AdSense />
 
         <div className="mt-10 text-center text-xs text-muted-foreground">
           팁: 3번의 기회를 제공합니다.
