@@ -48,8 +48,8 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
   });
 
   const handleZoomIn = () => {
-    if (position.zoom >= 8) return;
-    setPosition((pos) => ({ ...pos, zoom: pos.zoom * 1.5 }));
+    if (position.zoom >= 40) return;
+    setPosition((pos) => ({ ...pos, zoom: Math.min(pos.zoom * 1.5, 40) }));
   };
 
   const handleZoomOut = () => {
@@ -375,7 +375,7 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
                         zoom={position.zoom}
                         center={position.coordinates as [number, number]}
                         onMoveEnd={handleMoveEnd}
-                        maxZoom={12}
+                        maxZoom={40}
                       >
                         {/* 지도 배경 구 효과 (바다) */}
                         <Sphere

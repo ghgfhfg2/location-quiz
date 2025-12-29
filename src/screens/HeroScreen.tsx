@@ -1,25 +1,25 @@
-import { Button } from "@/components/ui/button"
-import { Globe2Icon, PlayIcon } from "lucide-react"
-import * as React from "react"
+import { Button } from "@/components/ui/button";
+import { Globe2Icon, PlayIcon } from "lucide-react";
+import * as React from "react";
 
 export function HeroScreen({ onStart }: { onStart: () => void }) {
-  const ref = React.useRef<HTMLDivElement | null>(null)
+  const ref = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
-    const el = ref.current
-    if (!el) return
+    const el = ref.current;
+    if (!el) return;
 
     const onMove = (e: PointerEvent) => {
-      const rect = el.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width
-      const y = (e.clientY - rect.top) / rect.height
-      el.style.setProperty("--mx", `${Math.round(x * 100)}%`)
-      el.style.setProperty("--my", `${Math.round(y * 100)}%`)
-    }
+      const rect = el.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      el.style.setProperty("--mx", `${Math.round(x * 100)}%`);
+      el.style.setProperty("--my", `${Math.round(y * 100)}%`);
+    };
 
-    el.addEventListener("pointermove", onMove)
-    return () => el.removeEventListener("pointermove", onMove)
-  }, [])
+    el.addEventListener("pointermove", onMove);
+    return () => el.removeEventListener("pointermove", onMove);
+  }, []);
 
   return (
     <div
@@ -49,11 +49,12 @@ export function HeroScreen({ onStart }: { onStart: () => void }) {
         <div className="w-full rounded-3xl border bg-card/70 p-8 shadow-sm backdrop-blur md:p-12">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-balance text-3xl font-semibold tracking-tight md:text-5xl">
-              지도만 보고 <span className="text-primary">국가</span>를 맞춰보자
+              <span className="text-primary">국가</span>를 지도와 함께
+              맞춰보세요!
             </h1>
             <p className="mt-4 text-pretty text-muted-foreground md:text-lg">
-              랜덤으로 표시되는 국가 영역을 보고, 아래 국기 리스트에서 정답 국기를 선택해
-              맞추는 퀴즈야.
+              랜덤으로 표시되는 국가 혹은 국가 영역을 보고, 정답을 맞추는 퀴즈
+              입니다.
             </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -61,19 +62,17 @@ export function HeroScreen({ onStart }: { onStart: () => void }) {
                 <PlayIcon data-icon="inline-start" />
                 게임 시작
               </Button>
-              <div className="text-xs text-muted-foreground">
+              {/* <div className="text-xs text-muted-foreground">
                 도시/랜덤 모드는 준비 중
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
 
         <div className="mt-10 text-center text-xs text-muted-foreground">
-          팁: 국기 리스트는 맞춘 국가가 계속 남아있고, 모두 맞추면 클리어!
+          팁: 3번의 기회를 제공합니다.
         </div>
       </div>
     </div>
-  )
+  );
 }
-
-

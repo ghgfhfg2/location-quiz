@@ -165,7 +165,7 @@ export function FindOnMapQuizScreen({ onBack }: { onBack: () => void }) {
   };
 
   const handleZoomIn = () =>
-    setPosition((p) => ({ ...p, zoom: Math.min(p.zoom * 1.5, 12) }));
+    setPosition((p) => ({ ...p, zoom: Math.min(p.zoom * 1.5, 40) }));
   const handleZoomOut = () =>
     setPosition((p) => ({ ...p, zoom: Math.max(p.zoom / 1.5, 1) }));
   const handleResetPos = () => setPosition({ coordinates: [0, 0], zoom: 1 });
@@ -305,7 +305,7 @@ export function FindOnMapQuizScreen({ onBack }: { onBack: () => void }) {
                       zoom={position.zoom}
                       center={position.coordinates as [number, number]}
                       onMoveEnd={setPosition}
-                      maxZoom={12}
+                      maxZoom={40}
                     >
                       <Sphere
                         id="sphere"
