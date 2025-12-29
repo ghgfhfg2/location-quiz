@@ -49,13 +49,12 @@ export function HeroScreen({ onStart }: { onStart: () => void }) {
 
         <div className="w-full rounded-3xl border bg-card/70 p-8 shadow-sm backdrop-blur md:p-12">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-balance text-3xl font-semibold tracking-tight md:text-5xl">
-              <span className="text-primary">국가</span>를 지도와 함께
-              맞춰보세요!
+            <h1 className="text-balance text-3xl font-bold tracking-tight md:text-5xl">
+              전 세계 <span className="text-primary">나라맞추기</span> 퀴즈
             </h1>
             <p className="mt-4 text-pretty text-muted-foreground md:text-lg">
-              랜덤으로 표시되는 국가 혹은 국가 영역을 보고, 정답을 맞추는 퀴즈
-              입니다.
+              지도와 국기를 활용해 전 세계 국가의 위치와 이름을 학습하고 퀴즈로
+              실력을 확인해보세요.
             </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

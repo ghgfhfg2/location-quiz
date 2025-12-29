@@ -25,8 +25,8 @@ export function ModeSelectScreen({
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-sm text-muted-foreground">모드 선택</div>
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight">
-              어떤 모드를 시작할까?
+            <h2 className="mt-1 text-2xl font-bold tracking-tight">
+              나라맞추기 게임 모드를 선택하세요
             </h2>
           </div>
           <Button variant="outline" onClick={onBack}>
