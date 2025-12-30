@@ -269,9 +269,9 @@ export function LearningModeScreen({ onBack }: { onBack: () => void }) {
                                     ? "var(--primary)"
                                     : "var(--background)"
                                 }
-                                stroke={isSelected ? "white" : "var(--border)"}
+                                stroke={isSelected ? "white" : "#999"}
                                 strokeWidth={
-                                  (isSelected ? 0.8 : 0.3) / position.zoom
+                                  (isSelected ? 0.8 : 0.4) / position.zoom
                                 }
                                 onClick={() => handleCountryClick(geo)}
                                 className="outline-none"

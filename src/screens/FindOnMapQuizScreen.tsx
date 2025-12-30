@@ -363,9 +363,9 @@ export function FindOnMapQuizScreen({ onBack }: { onBack: () => void }) {
                             const stroke =
                               isClicked || isGuessed || isTarget
                                 ? "white"
-                                : "var(--border)";
+                                : "#999";
                             const strokeWidth =
-                              (isClicked || isGuessed || isTarget ? 0.8 : 0.3) /
+                              (isClicked || isGuessed || isTarget ? 0.8 : 0.4) /
                               position.zoom;
 
                             return (

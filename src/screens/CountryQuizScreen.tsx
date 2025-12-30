@@ -455,9 +455,9 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
                                 : "var(--background)";
                               const stroke = isTarget
                                 ? "var(--primary)"
-                                : "var(--border)";
+                                : "#999";
                               const strokeWidth =
-                                (isTarget ? 0.6 : 0.3) / position.zoom;
+                                (isTarget ? 0.8 : 0.4) / position.zoom;
                               const fillOpacity = isTarget
                                 ? 1
                                 : isGuessed
