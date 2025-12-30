@@ -28,7 +28,11 @@ import {
   Graticule,
   Sphere,
 } from "react-simple-maps";
-import { feature } from "topojson-client";
+import {
+  getCountriesFeatureCollectionWithSomalilandMerged,
+  normalizeSomaliaIdFromGeography,
+  type MinimalFeature,
+} from "@/lib/worldGeographies";
 
 type PlayableCountry = {
   idNumeric: number;
@@ -37,8 +41,10 @@ type PlayableCountry = {
 
 type Feedback = "idle" | "correct" | "wrong" | "failed";
 
+type RsmGeo = MinimalFeature & { rsmKey: string };
+
 export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
-  const [worldTopo, setWorldTopo] = React.useState<any | null>(null);
+  const [worldTopo, setWorldTopo] = React.useState<unknown | null>(null);
   const [worldTopoError, setWorldTopoError] = React.useState<string | null>(
     null
   );
@@ -92,8 +98,13 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
     };
   }, []);
 
+  const countriesFc = React.useMemo(
+    () => getCountriesFeatureCollectionWithSomalilandMerged(worldTopo),
+    [worldTopo]
+  );
+
   const playable = React.useMemo<PlayableCountry[]>(() => {
-    if (!worldTopo) return [];
+    if (countriesFc.features.length === 0) return [];
     const byNumeric = new Map<number, CountryMeta>();
     for (const c of countryMetas) {
       const n = getCountryNumericCode(c);
@@ -101,16 +112,13 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
       byNumeric.set(n, c);
     }
 
-    const topo = worldTopo as any;
-    const fc = feature(topo, topo.objects.countries) as any;
-    const feats: any[] = fc.features ?? [];
-
     const out: PlayableCountry[] = [];
-    for (const f of feats) {
+    for (const f of countriesFc.features) {
       // 1. 형상 데이터가 없으면 제외
       if (
         !f.geometry ||
         (f.geometry.type === "MultiPolygon" &&
+          Array.isArray(f.geometry.coordinates) &&
           f.geometry.coordinates.length === 0)
       )
         continue;
@@ -131,7 +139,7 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
     );
 
     return out;
-  }, [worldTopo]);
+  }, [countriesFc.features]);
 
   const [guessed, setGuessed] = React.useState<Set<number>>(() => new Set());
   const [targetId, setTargetId] = React.useState<number | null>(null);
@@ -440,10 +448,16 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
                           step={[15, 15]}
                         />
 
-                        <Geographies geography={worldTopo as any}>
-                          {({ geographies }: { geographies: any[] }) =>
-                            geographies.map((geo: any) => {
-                              const idNumeric = Number((geo as any).id);
+                        <Geographies geography={countriesFc}>
+                          {({
+                            geographies: renderedGeos,
+                          }: {
+                            geographies: RsmGeo[];
+                          }) =>
+                            renderedGeos.map((geo) => {
+                              const idNumeric =
+                                normalizeSomaliaIdFromGeography(geo) ??
+                                Number(geo.id);
 
                               const isGuessed = guessed.has(idNumeric);
                               const isTarget =

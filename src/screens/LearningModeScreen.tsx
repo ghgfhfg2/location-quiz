@@ -25,15 +25,21 @@ import {
   Graticule,
   Sphere,
 } from "react-simple-maps";
-import { feature } from "topojson-client";
+import {
+  getCountriesFeatureCollectionWithSomalilandMerged,
+  normalizeSomaliaIdFromGeography,
+  type MinimalFeature,
+} from "@/lib/worldGeographies";
 
 type PlayableCountry = {
   idNumeric: number;
   meta: CountryMeta;
 };
 
+type RsmGeo = MinimalFeature & { rsmKey: string };
+
 export function LearningModeScreen({ onBack }: { onBack: () => void }) {
-  const [worldTopo, setWorldTopo] = React.useState<any | null>(null);
+  const [worldTopo, setWorldTopo] = React.useState<unknown | null>(null);
   const [worldTopoError, setWorldTopoError] = React.useState<string | null>(
     null
   );
@@ -68,8 +74,13 @@ export function LearningModeScreen({ onBack }: { onBack: () => void }) {
     };
   }, []);
 
+  const countriesFc = React.useMemo(
+    () => getCountriesFeatureCollectionWithSomalilandMerged(worldTopo),
+    [worldTopo]
+  );
+
   const playable = React.useMemo<PlayableCountry[]>(() => {
-    if (!worldTopo) return [];
+    if (countriesFc.features.length === 0) return [];
     const byNumeric = new Map<number, CountryMeta>();
     for (const c of countryMetas) {
       const n = getCountryNumericCode(c);
@@ -77,16 +88,13 @@ export function LearningModeScreen({ onBack }: { onBack: () => void }) {
       byNumeric.set(n, c);
     }
 
-    const topo = worldTopo as any;
-    const fc = feature(topo, topo.objects.countries) as any;
-    const feats: any[] = fc.features ?? [];
-
     const out: PlayableCountry[] = [];
-    for (const f of feats) {
+    for (const f of countriesFc.features) {
       // 1. 형상 데이터가 없으면 제외
       if (
         !f.geometry ||
         (f.geometry.type === "MultiPolygon" &&
+          Array.isArray(f.geometry.coordinates) &&
           f.geometry.coordinates.length === 0)
       )
         continue;
@@ -107,7 +115,7 @@ export function LearningModeScreen({ onBack }: { onBack: () => void }) {
     );
 
     return out;
-  }, [worldTopo]);
+  }, [countriesFc.features]);
 
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -117,8 +125,10 @@ export function LearningModeScreen({ onBack }: { onBack: () => void }) {
     );
   }, [playable, query]);
 
-  const handleCountryClick = (geo: any) => {
-    const idNumeric = Number(geo.id);
+  const handleCountryClick = (geo: RsmGeo) => {
+    const idNumeric = normalizeSomaliaIdFromGeography(geo) ?? Number(geo.id);
+    if (!Number.isFinite(idNumeric)) return;
+
     const found = playable.find((p) => p.idNumeric === idNumeric);
     if (found) {
       setSelectedCountry(found);
@@ -139,7 +149,7 @@ export function LearningModeScreen({ onBack }: { onBack: () => void }) {
   };
 
   const handleZoomIn = () =>
-    setPosition((p) => ({ ...p, zoom: Math.min(p.zoom * 1.5, 12) }));
+    setPosition((p) => ({ ...p, zoom: Math.min(p.zoom * 1.5, 40) }));
   const handleZoomOut = () =>
     setPosition((p) => ({ ...p, zoom: Math.max(p.zoom / 1.5, 1) }));
   const handleResetPos = () => setPosition({ coordinates: [0, 0], zoom: 1 });
@@ -239,7 +249,7 @@ export function LearningModeScreen({ onBack }: { onBack: () => void }) {
                       zoom={position.zoom}
                       center={position.coordinates as [number, number]}
                       onMoveEnd={setPosition}
-                      maxZoom={12}
+                      maxZoom={40}
                     >
                       <Sphere
                         id="sphere"
@@ -252,10 +262,16 @@ export function LearningModeScreen({ onBack }: { onBack: () => void }) {
                         strokeWidth={0.2 / position.zoom}
                         step={[15, 15]}
                       />
-                      <Geographies geography={worldTopo}>
-                        {({ geographies }: { geographies: any[] }) =>
-                          geographies.map((geo: any) => {
-                            const idNumeric = Number(geo.id);
+                      <Geographies geography={countriesFc}>
+                        {({
+                          geographies: renderedGeos,
+                        }: {
+                          geographies: RsmGeo[];
+                        }) =>
+                          renderedGeos.map((geo) => {
+                            const idNumeric =
+                              normalizeSomaliaIdFromGeography(geo) ??
+                              Number(geo.id);
 
                             const isSelected =
                               selectedCountry?.idNumeric === idNumeric;
