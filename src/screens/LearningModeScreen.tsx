@@ -83,6 +83,14 @@ export function LearningModeScreen({ onBack }: { onBack: () => void }) {
 
     const out: PlayableCountry[] = [];
     for (const f of feats) {
+      // 1. 형상 데이터가 없으면 제외
+      if (
+        !f.geometry ||
+        (f.geometry.type === "MultiPolygon" &&
+          f.geometry.coordinates.length === 0)
+      )
+        continue;
+
       const idNumeric = Number(f.id);
       if (!Number.isFinite(idNumeric)) continue;
       const meta = byNumeric.get(idNumeric);
@@ -119,8 +127,15 @@ export function LearningModeScreen({ onBack }: { onBack: () => void }) {
 
   const handleListSelect = (country: PlayableCountry) => {
     setSelectedCountry(country);
-    // 리스트에서 선택 시 해당 국가가 잘 보이도록 초기화 (또는 특정 좌표로 이동할 수 있으나 중심점 데이터 부재로 초기화 우선)
-    // 나중에 좌표 데이터가 보강되면 해당 국가로 이동하는 로직 추가 가능
+    // 리스트에서 선택 시 해당 국가가 잘 보이도록 이동
+    if (country.meta.latlng) {
+      const [lat, lng] = country.meta.latlng;
+      setPosition((pos) => ({
+        ...pos,
+        coordinates: [lng, lat],
+        zoom: Math.max(pos.zoom, 2),
+      }));
+    }
   };
 
   const handleZoomIn = () =>

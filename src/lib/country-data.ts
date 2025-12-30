@@ -8,6 +8,7 @@ export type CountryMeta = {
   translations?: {
     kor?: { common?: string }
   }
+  latlng: [number, number]
 }
 
 export const countryMetas: CountryMeta[] = rawCountries as CountryMeta[]

@@ -107,6 +107,14 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
 
     const out: PlayableCountry[] = [];
     for (const f of feats) {
+      // 1. 형상 데이터가 없으면 제외
+      if (
+        !f.geometry ||
+        (f.geometry.type === "MultiPolygon" &&
+          f.geometry.coordinates.length === 0)
+      )
+        continue;
+
       const idNumeric = Number(f.id);
       if (!Number.isFinite(idNumeric)) continue;
       const meta = byNumeric.get(idNumeric);
@@ -132,6 +140,7 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
   const [query, setQuery] = React.useState("");
   const [attempts, setAttempts] = React.useState(0);
   const [isGameOver, setIsGameOver] = React.useState(false);
+  const [showResultModal, setShowResultModal] = React.useState(false);
   const MAX_ATTEMPTS = 3;
 
   const guessedCount = guessed.size;
@@ -160,10 +169,22 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
         return;
       }
       const idx = Math.floor(Math.random() * nextRemaining.length);
-      setTargetId(nextRemaining[idx]!.idNumeric);
+      const nextCountry = nextRemaining[idx]!;
+      setTargetId(nextCountry.idNumeric);
       setSelectedId(null);
       setFeedback("idle");
       setAttempts(0);
+
+      // 해당 국가로 지도 중심 이동
+      if (nextCountry.meta.latlng) {
+        const [lat, lng] = nextCountry.meta.latlng;
+        setPosition((pos) => ({
+          ...pos,
+          coordinates: [lng, lat],
+          // 어느 정도 확대한 상태로 보여주기 (너무 작으면 보기 힘드므로)
+          zoom: Math.max(pos.zoom, 2),
+        }));
+      }
     },
     [playable]
   );
@@ -179,6 +200,7 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
     setGuessed(empty);
     setQuery("");
     setIsGameOver(false);
+    setShowResultModal(false);
     setAttempts(0);
     pickNext(empty);
   };
@@ -203,6 +225,7 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
         // 3번 틀리면 정답을 잠시 보여준 후 게임 오버
         window.setTimeout(() => {
           setIsGameOver(true);
+          setShowResultModal(true);
         }, 1500);
       } else {
         setFeedback("wrong");
@@ -244,18 +267,43 @@ export function CountryQuizScreen({ onBack }: { onBack: () => void }) {
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          {isGameOver && (
+          {isGameOver && showResultModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-6">
-              <Card className="w-full max-w-md shadow-2xl border-primary/20">
+              <Card className="w-full max-w-md shadow-2xl border-primary/20 relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-4 top-4 rounded-full"
+                  onClick={() => setShowResultModal(false)}
+                >
+                  <XCircleIcon className="size-6 text-muted-foreground" />
+                </Button>
                 <CardHeader className="text-center">
                   <CardTitle className="text-3xl font-bold text-rose-600">
                     GAME OVER
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6 text-center">
-                  <div className="py-4">
-                    <p className="text-muted-foreground">최종 점수</p>
-                    <p className="text-5xl font-black text-primary mt-2">
+                  {target && (
+                    <div className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-muted/30 border border-muted">
+                      <p className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">
+                        정답이었던 나라
+                      </p>
+                      <div className="text-5xl shadow-sm rounded overflow-hidden border bg-background">
+                        <ReactCountryFlag
+                          countryCode={target.meta.cca2!}
+                          svg
+                          style={{ width: "1.5em", height: "1.1em" }}
+                        />
+                      </div>
+                      <p className="text-xl font-bold text-foreground">
+                        {getCountryDisplayName(target.meta)}
+                      </p>
+                    </div>
+                  )}
+                  <div className="py-2">
+                    <p className="text-muted-foreground text-sm">최종 점수</p>
+                    <p className="text-5xl font-black text-primary mt-1">
                       {guessedCount}{" "}
                       <span className="text-2xl font-normal text-muted-foreground">
                         / {totalCount}

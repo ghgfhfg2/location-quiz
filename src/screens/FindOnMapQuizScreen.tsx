@@ -53,6 +53,7 @@ export function FindOnMapQuizScreen({ onBack }: { onBack: () => void }) {
   const [feedback, setFeedback] = React.useState<Feedback>("idle");
   const [attempts, setAttempts] = React.useState(0);
   const [isGameOver, setIsGameOver] = React.useState(false);
+  const [showResultModal, setShowResultModal] = React.useState(false);
   const MAX_ATTEMPTS = 3;
 
   const playable = React.useMemo<PlayableCountry[]>(() => {
@@ -70,6 +71,14 @@ export function FindOnMapQuizScreen({ onBack }: { onBack: () => void }) {
 
     const out: PlayableCountry[] = [];
     for (const f of feats) {
+      // 1. 형상 데이터가 없으면 제외
+      if (
+        !f.geometry ||
+        (f.geometry.type === "MultiPolygon" &&
+          f.geometry.coordinates.length === 0)
+      )
+        continue;
+
       const idNumeric = Number(f.id);
       if (!Number.isFinite(idNumeric)) continue;
       const meta = byNumeric.get(idNumeric);
@@ -130,6 +139,7 @@ export function FindOnMapQuizScreen({ onBack }: { onBack: () => void }) {
     setGuessedCount(0);
     setGuessedIds(new Set());
     setIsGameOver(false);
+    setShowResultModal(false);
     setAttempts(0);
     pickNext();
   };
@@ -153,7 +163,18 @@ export function FindOnMapQuizScreen({ onBack }: { onBack: () => void }) {
       setAttempts(nextAttempts);
       if (nextAttempts >= MAX_ATTEMPTS) {
         setFeedback("failed");
-        window.setTimeout(() => setIsGameOver(true), 1500);
+        // 정답 위치를 보여주기 위해 해당 국가로 지도 이동 및 확대
+        if (targetCountry?.meta.latlng) {
+          const [lat, lng] = targetCountry.meta.latlng;
+          setPosition({
+            coordinates: [lng, lat],
+            zoom: 4,
+          });
+        }
+        window.setTimeout(() => {
+          setIsGameOver(true);
+          setShowResultModal(true);
+        }, 1500);
       } else {
         setFeedback("wrong");
         window.setTimeout(() => {
@@ -418,13 +439,18 @@ export function FindOnMapQuizScreen({ onBack }: { onBack: () => void }) {
       </div>
 
       {/* Game Over Modal */}
-      {isGameOver && (
+      {isGameOver && showResultModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-md p-6 animate-in fade-in duration-300">
-          <Card className="w-full max-w-md shadow-2xl border-primary/20 scale-in-center">
+          <Card className="w-full max-w-md shadow-2xl border-primary/20 scale-in-center relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4 rounded-full"
+              onClick={() => setShowResultModal(false)}
+            >
+              <XCircleIcon className="size-6 text-muted-foreground" />
+            </Button>
             <CardHeader className="text-center pb-2">
-              <div className="mx-auto mb-4 bg-rose-100 text-rose-600 rounded-full p-3 w-fit">
-                <XCircleIcon size={48} />
-              </div>
               <CardTitle className="text-4xl font-black text-rose-600 tracking-tighter">
                 GAME OVER
               </CardTitle>
